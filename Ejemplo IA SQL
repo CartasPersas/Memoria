@@ -1,7 +1,7 @@
 Ejemplo Práctico: Reducción de Cambios de Contexto (SELECT en Bucle)
 
 Un patrón ineficiente muy común consiste en ejecutar sentencias SQL dentro de un bucle PL/SQL. Consideremos el siguiente bloque, que recupera IDs y luego busca detalles para cada ID individualmente:
-C
+
 Código INEFICIENTE (SELECT en bucle)
 Supongamos que tenemos una tabla asignaturas y una tabla profesores, y quieres obtener el nombre del profesor de cada asignatura activa. Un mal enfoque sería este:
 
