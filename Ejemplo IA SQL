@@ -1,0 +1,34 @@
+Ejemplo Práctico: Reducción de Cambios de Contexto (SELECT en Bucle)
+Un patrón ineficiente muy común consiste en ejecutar sentencias SQL dentro de un bucle PL/SQL. Consideremos el siguiente bloque, que recupera IDs y luego busca detalles para cada ID individualmente:
+Código Ineficiente:
+DECLARE
+TYPE id_list_t IS TABLE OF tabla_origen.id%TYPE;
+l_ids id_list_t;
+v_detalle tabla_detalle.detalle%TYPE;
+BEGIN
+SELECT id BULK COLLECT INTO l_ids FROM tabla_origen WHERE condicion = 'Y';
+FOR i IN 1..l_ids.COUNT LOOP
+-- SELECT dentro del bucle: ¡Cambio de contexto por cada ID!
+SELECT detalle INTO v_detalle FROM tabla_detalle WHERE id_origen = l_ids(i);
+-- (Procesar v_detalle...)
+END LOOP;
+END;
+Un asistente de IA podría analizar este código e identificar el problema:
+Diagnóstico IA: "Este código ejecuta una sentencia SELECT por cada iteración del bucle, provocando múltiples cambios de contexto entre PL/SQL y SQL que degradan el rendimiento. Se recomienda obtener todos los datos necesarios en una única consulta."
+Siguiendo esta sugerencia, el código podría reescribirse utilizando un JOIN:
+Código Optimizado:
+SQL
+DECLARE
+CURSOR c_datos_completos IS
+SELECT t1.id, t2.detalle
+FROM tabla_origen t1
+JOIN tabla_detalle t2 ON t1.id = t2.id_origen
+WHERE t1.condicion = 'Y';
+BEGIN
+FOR rec IN c_datos_completos LOOP -- Una sola consulta SQL ejecutada
+-- Se procesa rec.id y rec.detalle directamente
+-- ¡Sin SELECTs adicionales ni cambios de contexto dentro del bucle!
+END LOOP;
+END;
+
+Este tipo de optimización, identificada y sugerida por la IA, va más allá de la simple corrección sintáctica y aborda mejoras estructurales con un impacto directo en el rendimiento de las aplicaciones del SDAPA, reduciendo la carga sobre la base de datos y agilizando los procesos.
