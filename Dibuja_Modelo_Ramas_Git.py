@@ -33,9 +33,14 @@ coordenadas_x = {
 }
 
 # --- Configuración de Grosores de Línea ---
-GROSOR_ESPECIAL_RAMA_MAIN = 5.0    # La rama 'main' es más gruesa
-GROSOR_OTRAS_RAMAS_PRINCIPALES = 3.0 # Grosor ramas principales
-GROSOR_FLECHA = 2.0 # Grosor flechas
+GROSOR_ESPECIAL_RAMA_MAIN = 12.0
+GROSOR_OTRAS_RAMAS_PRINCIPALES = 8.0
+GROSOR_FLECHA = 5.0
+
+# --- Parámetros para la punta de la flecha ---
+ANCHO_PUNTA_FLECHA = 0.4
+LARGO_PUNTA_FLECHA = 0.4
+
 
 # --- Creación de la Figura y Ejes ---
 figura, ejes = plt.subplots(figsize=(16, 8))
@@ -46,7 +51,7 @@ for nombre_clave_rama, estilo in estilos_rama.items():
     ejes.plot([coordenadas_x["inicio_lineas"], coordenadas_x["fin_lineas"]], [estilo["y"], estilo["y"]],
               color=estilo["color"], linewidth=grosor_a_usar, label=estilo["etiqueta"])
     ejes.text(coordenadas_x["inicio_lineas"] - 0.2, estilo["y"], estilo["etiqueta"],
-              ha='right', va='center', color=estilo["color"], fontsize=11, fontweight='bold')
+              ha='right', va='center', color=estilo["color"], fontsize=26, fontweight='bold')
 
 # --- Función Auxiliar para Dibujar Flechas ---
 def dibujar_flecha(clave_rama_origen, clave_rama_destino, clave_x_inicio_flecha, es_accion_merge, color_flecha, radio_curvatura=0.3):
@@ -59,32 +64,47 @@ def dibujar_flecha(clave_rama_origen, clave_rama_destino, clave_x_inicio_flecha,
     else:
         x_fin_absoluto = coordenadas_x[clave_x_inicio_flecha]
 
-    valor_curvatura_real = radio_curvatura if y_hacia > y_desde else -radio_curvatura if y_hacia < y_desde else 0
-    if x_inicio_absoluto == x_fin_absoluto and y_desde != y_hacia:
-        valor_curvatura_real = 0
+    estilo_punta_flecha = f'-|>,head_width={ANCHO_PUNTA_FLECHA},head_length={LARGO_PUNTA_FLECHA}'
 
-    ejes.annotate(
-        "",
-        xy=(x_fin_absoluto, y_hacia),
-        xytext=(x_inicio_absoluto, y_desde),
-        arrowprops=dict(arrowstyle="->", color=color_flecha, linewidth=GROSOR_FLECHA,
-                        connectionstyle=f"arc3,rad={valor_curvatura_real}" if valor_curvatura_real != 0 else "arc3,rad=0"),
-    )
+    if x_inicio_absoluto == x_fin_absoluto and y_desde != y_hacia: # Flecha vertical
+        connection_style_str = "arc3,rad=0"
+        ejes.annotate(
+            "",
+            xy=(x_fin_absoluto, y_hacia),
+            xytext=(x_inicio_absoluto, y_desde),
+            arrowprops=dict(arrowstyle=estilo_punta_flecha, color=color_flecha, linewidth=GROSOR_FLECHA,
+                            connectionstyle=connection_style_str),
+        )
+    else: # Flecha curvada u horizontal
+        valor_curvatura_real = radio_curvatura if y_hacia > y_desde else -radio_curvatura if y_hacia < y_desde else 0
+        if y_desde == y_hacia and not es_accion_merge :
+             valor_curvatura_real = 0
+
+        connection_style_str = f"arc3,rad={valor_curvatura_real}"
+        ejes.annotate(
+            "",
+            xy=(x_fin_absoluto, y_hacia),
+            xytext=(x_inicio_absoluto, y_desde),
+            arrowprops=dict(arrowstyle=estilo_punta_flecha, color=color_flecha, linewidth=GROSOR_FLECHA,
+                            connectionstyle=connection_style_str),
+        )
+
 
 # --- Dibujar Flujos Específicos (Ramificaciones y Fusiones) ---
 # 1. Rama Feature (Característica)
-dibujar_flecha("develop", "feature/*", "x_ramificar_feature_desde_develop", False, estilos_rama["feature/*"]["color"], radio_curvatura=0)
-dibujar_flecha("feature/*", "develop", "x_fin_trabajo_feature", True, estilos_rama["feature/*"]["color"])
+dibujar_flecha("develop", "feature/*", "x_ramificar_feature_desde_develop", False, estilos_rama["develop"]["color"]) # Color de develop
+dibujar_flecha("feature/*", "develop", "x_fin_trabajo_feature", True, estilos_rama["feature/*"]["color"])      # Color de feature
 
 # 2. Rama Release (Lanzamiento)
-dibujar_flecha("develop", "release/x.y.z", "x_ramificar_release_desde_develop", False, estilos_rama["release/x.y.z"]["color"], radio_curvatura=0)
-dibujar_flecha("release/x.y.z", "main", "x_fin_trabajo_release", True, estilos_rama["release/x.y.z"]["color"])
-dibujar_flecha("release/x.y.z", "develop", "x_fin_trabajo_release", True, estilos_rama["release/x.y.z"]["color"])
+dibujar_flecha("develop", "release/x.y.z", "x_ramificar_release_desde_develop", False, estilos_rama["develop"]["color"]) # Color de develop
+dibujar_flecha("release/x.y.z", "main", "x_fin_trabajo_release", True, estilos_rama["release/x.y.z"]["color"])   # Color de release
+dibujar_flecha("release/x.y.z", "develop", "x_fin_trabajo_release", True, estilos_rama["release/x.y.z"]["color"]) # Color de release
 
 # 3. Rama Hotfix (Corrección Urgente)
-dibujar_flecha("main", "hotfix/*", "x_ramificar_hotfix_desde_main", False, estilos_rama["hotfix/*"]["color"], radio_curvatura=0)
-dibujar_flecha("hotfix/*", "main", "x_fin_trabajo_hotfix", True, estilos_rama["hotfix/*"]["color"])
-dibujar_flecha("hotfix/*", "develop", "x_fin_trabajo_hotfix", True, estilos_rama["hotfix/*"]["color"])
+dibujar_flecha("main", "hotfix/*", "x_ramificar_hotfix_desde_main", False, estilos_rama["main"]["color"]) # Color de main
+dibujar_flecha("hotfix/*", "main", "x_fin_trabajo_hotfix", True, estilos_rama["hotfix/*"]["color"], radio_curvatura=0.5) # Color de hotfix
+dibujar_flecha("hotfix/*", "develop", "x_fin_trabajo_hotfix", True, estilos_rama["hotfix/*"]["color"], radio_curvatura=0.4) # Color de hotfix
+
 
 # --- Estética Final del Gráfico ---
 ejes.set_yticks([])
@@ -94,7 +114,7 @@ ejes.spines['right'].set_visible(False)
 ejes.spines['bottom'].set_visible(False)
 ejes.spines['left'].set_visible(False)
 
-plt.title("Modelo de Ramas Git", fontsize=16)
+#plt.title("Modelo de Ramas Git", fontsize=32)
 plt.xlim(coordenadas_x["inicio_lineas"] - 0.7, coordenadas_x["fin_lineas"] + 0.5)
 plt.ylim(min(estilo["y"] for estilo in estilos_rama.values()) - 0.5, max(estilo["y"] for estilo in estilos_rama.values()) + 0.5)
 plt.tight_layout()
