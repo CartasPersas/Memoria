@@ -10,7 +10,7 @@ dot.attr(
     ranksep="1.5"
 )
 
-def create_node(dot, node_id, title, entrada, accion, salida, border_color): 
+def create_node(dot, node_id, title, entrada, accion, salida, border_color):    
     # Esta función genera un nodo con estilo de tabla, borde grueso y color personalizado.
     label = f'''<
         <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="4">
@@ -31,37 +31,48 @@ def create_node(dot, node_id, title, entrada, accion, salida, border_color):
         penwidth="5"
     )
 
-# Definimos los nodos
-create_node(dot, 'A', '1️⃣ Recepción de Peticiones y Priorización',
-            'Solicitudes de desarrollo/mejoras...', 
-            'Evaluación del impacto...', 
+# Nuevos títulos
+titulos_nuevos = [
+    'Recepción y priorización',
+    'Planificación',
+    'Análisis y diseño',
+    'Desarrollo e integración',
+    'Pruebas y control de calidad',
+    'Despliegue y gestión del cambio',
+    'Soporte e incidencias'
+]
+
+# Definimos los nodos con los nuevos títulos
+create_node(dot, 'A', titulos_nuevos[0],
+            'Solicitudes de desarrollo/mejoras...',    
+            'Evaluación del impacto...',    
             'Definición de prioridades.', '#003366')
-create_node(dot, 'B', '2️⃣ Planificación del Proyecto',
-            'Demandas priorizadas.', 
-            'Asignación de metodología...', 
+create_node(dot, 'B', titulos_nuevos[1],
+            'Demandas priorizadas.',    
+            'Asignación de metodología...',    
             'Plan de trabajo definido.', '#003366')
-create_node(dot, 'C', '3️⃣ Análisis y Diseño',
-            'Proyecto planificado.', 
-            'Validación de requisitos...', 
+create_node(dot, 'C', titulos_nuevos[2],
+            'Proyecto planificado.',    
+            'Validación de requisitos...',    
             'Documento de especificaciones...', '#0099cc')
-create_node(dot, 'D', '4️⃣ Desarrollo e Integración',
-            'Diseño aprobado.', 
-            'Codificación, revisión...', 
+create_node(dot, 'D', titulos_nuevos[3],
+            'Diseño aprobado.',    
+            'Codificación, revisión...',    
             'Versión lista para pruebas.', '#0099cc')
-create_node(dot, 'E', '5️⃣ Pruebas y Aseguramiento de Calidad',
-            'Aplicación desarrollada.', 
-            'Pruebas unitarias...', 
+create_node(dot, 'E', titulos_nuevos[4],
+            'Aplicación desarrollada.',    
+            'Pruebas unitarias...',    
             'Aplicación lista para producción.', '#666666')
-create_node(dot, 'F', '6️⃣ Despliegue en Producción y Gestión del Cambio',
-            'Aplicación validada en QA.', 
-            'Coordinación del despliegue...', 
+create_node(dot, 'F', titulos_nuevos[5],
+            'Aplicación validada en QA.',    
+            'Coordinación del despliegue...',    
             'Nueva versión en producción.', '#666666')
-create_node(dot, 'G', '7️⃣ Gestión de Incidencias y Soporte',
-            'Aplicación en producción.', 
-            'Monitorización, resolución...', 
+create_node(dot, 'G', titulos_nuevos[6],
+            'Aplicación en producción.',    
+            'Monitorización, resolución...',    
             'Mantenimiento continuo y mejoras.', '#cc0066')
 
-# Definimos Subgrafos para alinear nodos en filas 
+# Definimos Subgrafos para alinear nodos en filas    
 with dot.subgraph() as s1:
     s1.attr(rank='same')
     s1.node('A')
@@ -86,5 +97,5 @@ dot.edge('D:s', 'E:n')
 dot.edge('E:e', 'F:w')
 dot.edge('F:s', 'G:n')
 
-# Generar y abrir la imagen 
-dot.render('diagrama_zigzag_puertos', view=True)
+# Generar y abrir la imagen    
+dot.render('diagrama_zigzag_puertos_actualizado', view=True)
